@@ -1,0 +1,9 @@
+a=INPUT(x1)
+b=INPUT(x2)
+c=INPUT(x3)
+d=INPUT(x4)
+
+e=AND(b,c)
+f=NOR(a,e)
+g=OR(e,d)
+h=NOR(f,g)
