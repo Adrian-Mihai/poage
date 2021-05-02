@@ -1,5 +1,12 @@
+require_relative 'utils/inputs'
+
 class SolveBooleanEquation
-  def initialize(true_literal_variable, false_literal_variable, defects)
+
+  attr_reader :solutions
+
+  def initialize(primary_inputs, defects, true_literal_variable, false_literal_variable)
+    @solutions = []
+    @primary_inputs = primary_inputs
     @defects = defects
     @inverse_defects = reverse_defects
     @true_literal_variable = true_literal_variable
@@ -10,7 +17,21 @@ class SolveBooleanEquation
     @false_statement_defect = defect_statement(false_literal_variable)
   end
 
-  def solve; end
+  def solve
+    inputs = Inputs.generate(@primary_inputs)
+    equation = generate_equation
+    inputs.each do |input|
+      input.keys.each do |key|
+        equation.gsub!("/#{key}", input[key].to_i.zero? ? '1' : '0')
+        equation.gsub!(key, input[key])
+      end
+
+      arguments = equation.split(' + ')
+      arguments.map! { |argument| argument.include?('0') ? '0' : '1' }
+      solutions << input if arguments.include?('1')
+      equation = generate_equation
+    end
+  end
 
   def defects=(value)
     @defects = value
@@ -53,5 +74,28 @@ class SolveBooleanEquation
 
   def reverse_defects
     @defects.map { |defect| defect.include?('1') ? defect.gsub('1', '0') : defect.gsub('0', '1') }
+  end
+
+  def generate_equation
+    first_argument = apply_boolean_algebra(@false_statement_faultless, @true_statement_defect)
+    last_argument = apply_boolean_algebra(@true_statement_faultless, @false_statement_defect)
+
+    "#{first_argument} + #{last_argument}"
+  end
+
+  def apply_boolean_algebra(right_argument, left_argument)
+    right_arguments = right_argument.split(' + ')
+    left_arguments = left_argument.split(' + ')
+
+    return "#{right_arguments.first} ⋅ #{left_arguments.first}" if right_arguments.size == 1 && left_arguments.size == 1
+
+    expression = ''
+    right_arguments.each do |r_argument|
+      left_arguments.each do |l_argument|
+        expression << r_argument + ' ⋅ ' + l_argument + ' + '
+      end
+    end
+
+    expression.delete_suffix(' + ')
   end
 end
