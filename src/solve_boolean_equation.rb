@@ -1,4 +1,5 @@
 require_relative 'utils/inputs'
+require_relative 'utils/boolean_algebra'
 
 class SolveBooleanEquation
 
@@ -77,25 +78,9 @@ class SolveBooleanEquation
   end
 
   def generate_equation
-    first_argument = apply_boolean_algebra(@false_statement_faultless, @true_statement_defect)
-    last_argument = apply_boolean_algebra(@true_statement_faultless, @false_statement_defect)
+    first_argument = BooleanAlgebra.apply(@false_statement_faultless, @true_statement_defect)
+    last_argument = BooleanAlgebra.apply(@true_statement_faultless, @false_statement_defect)
 
     "#{first_argument} + #{last_argument}"
-  end
-
-  def apply_boolean_algebra(right_argument, left_argument)
-    right_arguments = right_argument.split(' + ')
-    left_arguments = left_argument.split(' + ')
-
-    return "#{right_arguments.first} ⋅ #{left_arguments.first}" if right_arguments.size == 1 && left_arguments.size == 1
-
-    expression = ''
-    right_arguments.each do |r_argument|
-      left_arguments.each do |l_argument|
-        expression << r_argument + ' ⋅ ' + l_argument + ' + '
-      end
-    end
-
-    expression.delete_suffix(' + ')
   end
 end
