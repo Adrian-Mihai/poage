@@ -1,4 +1,5 @@
 require_relative 'logic_gates'
+require_relative 'utils/boolean_algebra'
 
 class OutputStatements
   attr_reader :statements
@@ -35,7 +36,7 @@ class OutputStatements
       elaborate_right_argument(right_argument, node, inputs.first, state)
       elaborate_left_argument(left_argument, node, inputs.last, state)
 
-      return apply_boolean_algebra(right_argument, left_argument)
+      return BooleanAlgebra.apply(right_argument, left_argument)
     end
 
     elaborate_right_argument(raw_expression, node, inputs.first, state)
@@ -51,22 +52,6 @@ class OutputStatements
   def elaborate_left_argument(expression, node, input, state)
     expression.gsub!("B'", elaborate_false_expression(node, input, state)) ||
       expression.gsub!('B', elaborate_true_expression(node, input, state))
-  end
-
-  def apply_boolean_algebra(right_argument, left_argument)
-    right_arguments = right_argument.split(' + ')
-    left_arguments = left_argument.split(' + ')
-
-    return "#{right_arguments.first} ⋅ #{left_arguments.first}" if right_arguments.size == 1 && left_arguments.size == 1
-
-    expression = ''
-    right_arguments.each do |r_argument|
-      left_arguments.each do |l_argument|
-        expression << r_argument + ' ⋅ ' + l_argument + ' + '
-      end
-    end
-
-    expression.delete_suffix(' + ')
   end
 
   def elaborate_true_expression(node, input, state)
