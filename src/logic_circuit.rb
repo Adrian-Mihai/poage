@@ -3,11 +3,13 @@ require 'English'
 class LogicCircuit
   FILENAME = 'in.txt'.freeze
 
-  attr_reader :circuit, :errors
+  attr_reader :nodes, :inputs, :circuit, :errors
 
   def initialize(path = FILENAME)
     @path    = path
     @circuit = {}
+    @inputs  = []
+    @nodes   = []
     @errors  = []
     read
   end
@@ -28,7 +30,15 @@ class LogicCircuit
       parsed_line = line.strip.split('=')
       next @errors << "Line: #{$INPUT_LINE_NUMBER} Invalid format" unless parsed_line.size == 2
 
-      @circuit[parsed_line.first.to_sym] = parsed_line.last
+      extract(parsed_line)
     end
+  end
+
+  def extract(line)
+    @nodes << line.first
+    gate, inputs = line.last.split(/[()]/)
+    inputs = inputs.split(',')
+    @inputs << inputs.first if gate.casecmp?('INPUT')
+    @circuit[line.first.to_sym] = line.last
   end
 end
